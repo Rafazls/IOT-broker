@@ -1,0 +1,54 @@
+version: '2'
+services: 
+  mosquitto:
+    image: pascaldevink/rpi-mosquitto
+    container_name: mosquitto
+    ports:
+      - "1883:1883"
+    restart: always
+
+  influxdb:
+    image: influxdb:2
+    container_name: influxdb2
+    restart: always
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=neopc121
+      - DOCKER_INFLUXDB_INIT_ORG=globalsolution
+      - DOCKER_INFLUXDB_INIT_BUCKET=iot
+      - INFLUXDB_HTTP_AUTH_ENABLED=true
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=my-secret-token
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb2-data:/var/lib/influxdb2
+      - influxdb2-config:/etc/influxdb2
+
+  grafana:
+    image: fg2it/grafana-armhf:v4.6.3
+    container_name: grafana
+    restart: always
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-db:/var/lib/grafana
+      - grafana-log:/var/log/grafana
+      - grafana-conf:/etc/grafana
+
+volumes:
+  grafana-db:
+    driver: local
+  grafana-log:
+    driver: local
+  grafana-conf:
+    driver: local
+  influxdb2-data:
+    driver: local
+  influxdb2-config:
+    driver: local
+
+
